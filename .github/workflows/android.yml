@@ -1,0 +1,38 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # ضروري تستعمل Java 17 باش يخدم ليك API 34 بلا مشاكل
+    - name: set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # بناء نسخة الـ APK (Debug)
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    # استخراج ملف الـ APK باش تقدر تيليشارجيه من بعد
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Android-App-Debug
+        # هاد المسار هو فين كيتحط الـ APK غالباً فمشاريع أندرويد
+        path: app/build/outputs/apk/debug/*.apk
